@@ -25,7 +25,7 @@ import chromadb
 
 def get_chroma_client():
     client = chromadb.PersistentClient(CHROMA_DIR)
-    print(client.list_collections())
+    
     for name in COLLECTION_LIST:
         client.get_or_create_collection(name)
     return client

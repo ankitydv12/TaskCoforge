@@ -53,6 +53,9 @@ import hashlib
 
 from models.ChromaCollectionsEnum import CollectionEnum
 
+from typing import List
+from fastapi import File, UploadFile
+
 load_dotenv()
 
 UPLOAD_DIR = Path("uploads")
@@ -153,8 +156,6 @@ def upload_file(
 
     page_content = [doc.page_content for doc in result]
 
-    print(answer)
-
     chunk_response = ChunkResponse(
         chunk_strategy=technique_name,
         no_of_chunk=len(page_content),
@@ -203,14 +204,24 @@ def search(
     collection_name : CollectionEnum = Query(...),
     top_k_result : int = Query(...)
 ):
-    print(collection_name.value)
+    
     vector_store = get_chroma_store(collection_name.value)
-    result = vector_store.similarity_search(query,top_k_result)
+    result = vector_store.similarity_search_with_score(query,top_k_result)
+    print(f"Query : {query}")
+    answer = []
+    for res , score in result:
+        answer.append(
+            {
+                "score" : f"{score:.4f}",
+                "data" : res.page_content
+            }
+        )
+    print(answer)
     if(len(result)==0):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Nothing is Found in Collection")
-    for x in result:
-        print(x)
-        print()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Nothing is Found in Collection"
+                            )
+    
 
 
 

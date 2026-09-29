@@ -2,6 +2,9 @@
 from pydantic import BaseModel , Field , model_validator , field_validator 
 from langchain_core.documents import Document
 from typing import Dict, Any
+from dataclasses import dataclass
+
+
 
 class ChunkResponse(BaseModel):
     chunk_strategy : str 
@@ -41,3 +44,8 @@ class UpdateChunkRequest(BaseModel):
 class UpdatePolicyRequest(BaseModel):
     search_text: str     
     new_text: str    
+
+@dataclass
+class Document:
+    content : str
+    metadata : dict
