@@ -18,8 +18,9 @@ class UploadResult:
     error: str | None = None
 
 
-async def save_pdf(upload_id:str,files: list[UploadFile]) -> UploadResult:
+async def save_pdf(upload_id:str,files: list[UploadFile]) -> list[UploadResult]:
     """Stream one uploaded PDF to disk. Never raises; failures are returned."""
+    print("save_pdf executed")
     # Ensure upload directory exists
     os.makedirs(settings.upload_dir, exist_ok=True)
     total_files = len(files)
@@ -29,12 +30,14 @@ async def save_pdf(upload_id:str,files: list[UploadFile]) -> UploadResult:
         "uploaded": 0,
         "status": "processing"
     }
+    results: list[UploadResult] = []
 
-    for index, file in enumerate(files):
+    for index, file in enumerate(files,start=1):
         name = os.path.basename(file.filename or "unnamed.pdf")
 
         if not name.lower().endswith(".pdf"):
-            return UploadResult(name, None, 0, False, "Only .pdf files are allowed")
+            UploadResult(name, None, 0, False, "Only .pdf files are allowed")
+            continue
         
         dest = os.path.join(settings.upload_dir, f"{name}")
         size = 0
@@ -48,16 +51,21 @@ async def save_pdf(upload_id:str,files: list[UploadFile]) -> UploadResult:
                             raise ValueError("File content is not a valid PDF")
                         first = False
                     size += len(block)
-                    if size > MAX_FILE_SIZE:
-                        raise ValueError(f"File exceeds {MAX_FILE_SIZE // (1024 * 1024)} MB limit")
                     out.write(block)
+            print(size)
             if size == 0:
                 raise ValueError("File is empty")
+            results.append(
+                UploadResult(
+                    name,
+                    dest,
+                    size,
+                    True
+                )
+            )
+        finally:
             upload_progress[upload_id]["uploaded"] = index
-        except Exception as exc:
-            # Remove partially written file if error occurs
-            if os.path.exists(dest):
-                os.remove(dest)
-            return UploadResult(name, None, size, False, str(exc))
-    upload_progress[upload_id]["status"] = "completed"
-    return UploadResult(name, dest, size, True)
+            await file.close()
+
+    upload_progress[upload_id]["status"] = "uploaded"
+    return results
