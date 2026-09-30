@@ -5,6 +5,8 @@ from config import settings
 
 from schemas import upload_progress
 
+import asyncio
+
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB per file
 READ_BLOCK = 1024 * 1024          # 1 MB
 
@@ -20,7 +22,7 @@ class UploadResult:
 
 async def save_pdf(upload_id:str,files: list[UploadFile]) -> list[UploadResult]:
     """Stream one uploaded PDF to disk. Never raises; failures are returned."""
-    print("save_pdf executed")
+    print("save_pdf executed",upload_id)
     # Ensure upload directory exists
     os.makedirs(settings.upload_dir, exist_ok=True)
     total_files = len(files)
@@ -33,6 +35,8 @@ async def save_pdf(upload_id:str,files: list[UploadFile]) -> list[UploadResult]:
     results: list[UploadResult] = []
 
     for index, file in enumerate(files,start=1):
+        #TODO: sleep is for testing purpose 
+        await asyncio.sleep(2)
         name = os.path.basename(file.filename or "unnamed.pdf")
 
         if not name.lower().endswith(".pdf"):

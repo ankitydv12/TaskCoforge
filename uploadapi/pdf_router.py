@@ -15,6 +15,8 @@ from upload_service import UploadResult, save_pdf
 from schemas import upload_progress
 
 import uuid
+import asyncio
+
 
 router = APIRouter(tags=["pdf"])
 chunker = ChunkingService(settings.chunk_size, settings.chunk_overlap)
@@ -33,10 +35,12 @@ def _process_file(path: Path, name: str) -> tuple[int, list[Document]]:
 
 
 @router.post("/process-pdfs")
-async def process_pdfs(files: list[UploadFile] = File(...)):
+async def process_pdfs(background_task:BackgroundTasks,files: list[UploadFile] = File(...)):
     print("hello")
     # Step 1: save every file first. Chunking never starts before all are uploaded.
-    upload_id = str(uuid.uuid4())
+    #TODO: Remove hard code 
+    upload_id = "abc"
+    # upload_id = str(uuid.uuid4())
 
     # Initialize immediately
     upload_progress[upload_id] = {
@@ -44,10 +48,14 @@ async def process_pdfs(files: list[UploadFile] = File(...)):
         "uploaded": 0,
         "status": "queued"
     }
-    print(len(upload_progress))
-    await save_pdf(upload_id,files)
-    print(len(upload_progress))
-    yield {
+
+    background_task.add_task(
+        save_pdf,
+        upload_id,
+        files
+    )
+    
+    return{
     "upload_id": upload_id,
     "total_files": len(files),
     "message": "Upload started"
@@ -64,14 +72,15 @@ async def upload_progress_stream(upload_id: str):
  
             if progress is None:
                 yield f"data: {json.dumps({'error': 'Upload ID not found'})}\n\n"
-                break
+                return
  
             # Send progress to client
             yield f"data: {json.dumps(progress)}\n\n"
  
             # Stop when completed
-            if progress["status"] == "completed":
-                break   
+            if progress["status"] == "uploaded":
+                return
+            await asyncio.sleep(1)   
  
     return StreamingResponse(
         event_generator(),
