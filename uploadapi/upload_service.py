@@ -36,7 +36,7 @@ async def save_pdf(upload_id:str,files: list[UploadFile]) -> list[UploadResult]:
 
     for index, file in enumerate(files,start=1):
         #TODO: sleep is for testing purpose 
-        await asyncio.sleep(2)
+        #await asyncio.sleep(2)
         name = os.path.basename(file.filename or "unnamed.pdf")
 
         if not name.lower().endswith(".pdf"):

@@ -17,6 +17,8 @@ from schemas import upload_progress
 import uuid
 import asyncio
 
+from pdf_loader import load_pdf
+
 
 router = APIRouter(tags=["pdf"])
 chunker = ChunkingService(settings.chunk_size, settings.chunk_overlap)
@@ -50,10 +52,11 @@ async def process_pdfs(background_task:BackgroundTasks,files: list[UploadFile] =
     }
 
     background_task.add_task(
-        save_pdf,
+        process_upload,
         upload_id,
         files
     )
+
     
     return{
     "upload_id": upload_id,
@@ -79,10 +82,41 @@ async def upload_progress_stream(upload_id: str):
  
             # Stop when completed
             if progress["status"] == "uploaded":
-                return
-            await asyncio.sleep(1)   
+                break
+            await asyncio.sleep(1)
+        #TODO: Save files to chroma vector store
+            #TODO : Loading pdfs
+        # pdfs_path_list = [
+        #     os.path.join(settings.upload_dir, pdf)
+        #     for pdf in os.listdir(settings.upload_dir)
+        #     if pdf.lower().endswith(".pdf")
+        # ]
+                        
+        # print(type(pdfs_path_list[0]))
+        # print(pdfs_path_list[0])
+
+        
+        # docs = load_pdf(pdfs_path_list)
+        # print(f"length of the document {len(docs)}")
  
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream"
     )
+
+
+def process_upload(upload_id: str, files: list[UploadFile]):
+
+    upload_progress[upload_id]["status"] = "uploading"
+
+    save_pdf(upload_id, files)
+
+    upload_progress[upload_id]["status"] = "parsing"
+
+    pdfs_path_list = [
+        os.path.join(settings.upload_dir, pdf)
+        for pdf in os.listdir(settings.upload_dir)
+        if pdf.lower().endswith(".pdf")
+    ]
+
+    docs = load_pdf(pdfs_path_list)
