@@ -105,11 +105,11 @@ async def upload_progress_stream(upload_id: str):
     )
 
 
-def process_upload(upload_id: str, files: list[UploadFile]):
+async def process_upload(upload_id: str, files: list[UploadFile]):
 
     upload_progress[upload_id]["status"] = "uploading"
 
-    save_pdf(upload_id, files)
+    await  save_pdf(upload_id, files)
 
     upload_progress[upload_id]["status"] = "parsing"
 
@@ -119,4 +119,4 @@ def process_upload(upload_id: str, files: list[UploadFile]):
         if pdf.lower().endswith(".pdf")
     ]
 
-    docs = load_pdf(pdfs_path_list)
+    docs = await run_in_threadpool(load_pdf,pdfs_path_list)
