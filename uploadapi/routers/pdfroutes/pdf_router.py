@@ -1,27 +1,27 @@
+import asyncio
 import json
 import os
-from pathlib import Path
+import uuid
 
-from fastapi import APIRouter, File, UploadFile , BackgroundTasks
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    File,
+    UploadFile,
+)
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 
-from Services.chunkingservice import ChunkingService
 from Configs.config import settings
-from Services.pdf_loader import load_pdf
-from Schemas.schemas import Document
-from Services.upload_service import UploadResult, save_pdf
-
 from Schemas.schemas import upload_progress
-
-import uuid
-import asyncio
-
 from Services.pdf_loader import load_pdf
+from Services.upload_service import save_pdf
+from Services.vector_services import chroma_services
+import time
 
 
 router = APIRouter(tags=["pdf"])
-chunker = ChunkingService(settings.chunk_size, settings.chunk_overlap)
+# chunker = ChunkingService(settings.chunk_size, settings.chunk_overlap)
 
 
 
@@ -84,20 +84,6 @@ async def upload_progress_stream(upload_id: str):
             if progress["status"] == "uploaded":
                 break
             await asyncio.sleep(1)
-        #TODO: Save files to chroma vector store
-            #TODO : Loading pdfs
-        # pdfs_path_list = [
-        #     os.path.join(settings.upload_dir, pdf)
-        #     for pdf in os.listdir(settings.upload_dir)
-        #     if pdf.lower().endswith(".pdf")
-        # ]
-                        
-        # print(type(pdfs_path_list[0]))
-        # print(pdfs_path_list[0])
-
-        
-        # docs = load_pdf(pdfs_path_list)
-        # print(f"length of the document {len(docs)}")
  
     return StreamingResponse(
         event_generator(),
@@ -108,6 +94,8 @@ async def upload_progress_stream(upload_id: str):
 async def process_upload(upload_id: str, files: list[UploadFile]):
 
     upload_progress[upload_id]["status"] = "uploading"
+
+    start = time.perf_counter()
 
     await  save_pdf(upload_id, files)
 
@@ -120,3 +108,22 @@ async def process_upload(upload_id: str, files: list[UploadFile]):
     ]
 
     docs = await run_in_threadpool(load_pdf,pdfs_path_list)
+
+    upload_progress[upload_id]["status"] = "adding to vector"
+
+    await run_in_threadpool(
+        chroma_services.add_documents_to_chroma,
+        docs,
+        "collection1"
+    )
+
+    end = time.perf_counter() - start
+    print(f"Total Time Taken {end}")
+
+    # --------------------------------
+    # 4. Completed
+    # --------------------------------
+
+    upload_progress[upload_id]["status"] = "completed"
+
+

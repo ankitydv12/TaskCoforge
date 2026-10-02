@@ -16,8 +16,8 @@ def load_pdf(paths: list[str]) -> list[Document]:
     try:
         for path in paths:
             print(path)
-            source_name = path.split("/")[-1]
-            print(f"file name ---> {source_name}")
+            file_name = path.split("/")[-1]
+            print(f"file name ---> {file_name}")
             
             print("Reading the PDF......")
             reader = PdfReader(str(path))
@@ -35,7 +35,7 @@ def load_pdf(paths: list[str]) -> list[Document]:
                 if text:
                     docs.append(Document(
                         page_content=text,
-                        metadata={"source": source_name, "page": i, "total_pages": total},
+                        metadata={"file_name": file_name, "page": i, "total_pages": total},
                     ))
             
     except ValueError:
