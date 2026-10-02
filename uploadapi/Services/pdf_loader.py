@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
-from schemas import Document
+from Schemas.schemas import Document
 
 #TODO : for now source_name is optional later remove it 
 def load_pdf(paths: list[str]) -> list[Document]:

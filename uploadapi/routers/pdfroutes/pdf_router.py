@@ -6,18 +6,18 @@ from fastapi import APIRouter, File, UploadFile , BackgroundTasks
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 
-from chunkingservice import ChunkingService
-from config import settings
-from pdf_loader import load_pdf
-from schemas import Document
-from upload_service import UploadResult, save_pdf
+from Services.chunkingservice import ChunkingService
+from Configs.config import settings
+from Services.pdf_loader import load_pdf
+from Schemas.schemas import Document
+from Services.upload_service import UploadResult, save_pdf
 
-from schemas import upload_progress
+from Schemas.schemas import upload_progress
 
 import uuid
 import asyncio
 
-from pdf_loader import load_pdf
+from Services.pdf_loader import load_pdf
 
 
 router = APIRouter(tags=["pdf"])

@@ -1,12 +1,14 @@
 import chromadb
 import os
 
-from embedding import embedding
+from Services.embedding_service import embedding
 
 import hashlib
 from typing import List
 
 from fastapi  import  HTTPException , status
+
+from Schemas.schemas import Document
 
 CHROMA_DIR = "./chroma_db"
 os.makedirs(CHROMA_DIR, exist_ok=True)

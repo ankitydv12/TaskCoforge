@@ -1,9 +1,9 @@
 import os
 from dataclasses import dataclass
 from fastapi import UploadFile
-from config import settings
+from Configs.config import settings
 
-from schemas import upload_progress
+from Schemas.schemas import upload_progress
 
 import asyncio
 

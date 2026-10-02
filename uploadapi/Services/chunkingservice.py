@@ -1,6 +1,6 @@
 from bisect import bisect_right
 
-from schemas import Document
+from Schemas.schemas import Document
 
 PAGE_SEPARATOR = "\n\n"
 
