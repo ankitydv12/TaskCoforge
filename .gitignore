@@ -2,4 +2,5 @@ myenv/
 .env
 ../__pycache__/
 D:/Task01ChunkStra/Task01/chroma_db/
-D:/Task01ChunkStra/uploadapi/uploads/
+./uploadapi/uploads/
+./uploadapi/routers/pdfroutes/__pycache__/

@@ -4,5 +4,5 @@ from chromadb.utils.embedding_functions import (
 
 
 embedding = SentenceTransformerEmbeddingFunction(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+    model_name=r"D:\all-MiniLM-L6-v2"
 )

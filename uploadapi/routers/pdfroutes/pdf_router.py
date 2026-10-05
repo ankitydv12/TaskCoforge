@@ -17,7 +17,9 @@ from Schemas.schemas import upload_progress
 from Services.pdf_loader import load_pdf
 from Services.upload_service import save_pdf
 from Services.vector_services import chroma_services
+from Services.chunkingservice import chunk_services
 import time
+
 
 
 router = APIRouter(tags=["pdf"])
@@ -29,10 +31,10 @@ def _line(payload: dict) -> str:
     return json.dumps(payload) + "\n"
 
 
-def _process_file(path: Path, name: str) -> tuple[int, list[Document]]:
-    """Blocking work: pypdf extraction + chunking. Runs in a worker thread."""
-    pages = load_pdf(path, name)
-    return len(pages), chunker.chunk_documents(pages)
+# def _process_file(path: Path, name: str) -> tuple[int, list[Document]]:
+#     """Blocking work: pypdf extraction + chunking. Runs in a worker thread."""
+#     pages = load_pdf(path, name)
+#     return len(pages), chunker.chunk_documents(pages)
 
 
 
@@ -109,21 +111,28 @@ async def process_upload(upload_id: str, files: list[UploadFile]):
 
     docs = await run_in_threadpool(load_pdf,pdfs_path_list)
 
+
+    upload_progress[upload_id]["status"] = "Chunking"
+
+    chunked_docs = await run_in_threadpool(
+        chunk_services.character_chunk,
+        docs,
+        100,
+        20
+    )
+
     upload_progress[upload_id]["status"] = "adding to vector"
 
     await run_in_threadpool(
         chroma_services.add_documents_to_chroma,
-        docs,
+        chunked_docs,
         "collection1"
     )
 
-    end = time.perf_counter() - start
-    print(f"Total Time Taken {end}")
-
-    # --------------------------------
-    # 4. Completed
-    # --------------------------------
 
     upload_progress[upload_id]["status"] = "completed"
+
+    end = time.perf_counter() - start
+    print(f"Total Time Taken {end}")
 
 

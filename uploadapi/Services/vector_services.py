@@ -7,7 +7,8 @@ from chromadb.api import ClientAPI
 from chromadb.api.models.Collection import Collection
 from fastapi import HTTPException, status
 
-from Schemas.schemas import Document
+#from Schemas.schemas import Document
+from langchain_core.documents import Document
 from Services.embedding_service import embedding
 
 
