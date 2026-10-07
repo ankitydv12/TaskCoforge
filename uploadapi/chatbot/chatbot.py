@@ -1,6 +1,7 @@
 from langchain_huggingface import ChatHuggingFace , HuggingFaceEndpoint
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
 
 from dotenv import load_dotenv
 
@@ -33,7 +34,9 @@ llm = HuggingFaceEndpoint(
     max_new_tokens=350
 )
 
-model = ChatHuggingFace(llm=llm)
+# model = ChatHuggingFace(llm=llm)
+model = ChatOpenAI()
+
 def query(context,query):
     parser = StrOutputParser()
     _answer_chain = _answer_prompt | model | parser

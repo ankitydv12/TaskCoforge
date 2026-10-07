@@ -15,8 +15,7 @@ class Retrivals:
             n_results=top
         )
 
-        print("Type of result ",type(result))
-
-        print(result)
+        print("Retriving done")
+        return result
 
 retrival = Retrivals()
