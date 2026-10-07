@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from routers.pdfroutes.pdf_router import router as pdf_router
+from routers.chatbotroute.chatbot_routes import router as chatbot_router
 import os
 import shutil
 from Configs.config import settings
 app = FastAPI()
 app.include_router(pdf_router)
-
+app.include_router(chatbot_router)
 UPLOAD_DIR = settings.upload_dir
 
 @app.on_event("shutdown")

@@ -115,14 +115,13 @@ async def process_upload(upload_id: str, files: list[UploadFile]):
     upload_progress[upload_id]["status"] = "Chunking"
 
     chunked_docs = await run_in_threadpool(
-        chunk_services.character_chunk,
-        docs,
-        100,
-        20
+        chunk_services.semantic_chunking,
+        docs
     )
 
     upload_progress[upload_id]["status"] = "adding to vector"
 
+    #TODO: inject Collection from env
     await run_in_threadpool(
         chroma_services.add_documents_to_chroma,
         chunked_docs,
