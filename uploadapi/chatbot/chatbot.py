@@ -4,6 +4,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
 from dotenv import load_dotenv
+import os
+
+hf_key = os.environ.get("HF_TOKEN")
+print("HF_KEY --> ",hf_key)
 
 load_dotenv()
 NOT_FOUND_RESPONSE = (
@@ -34,8 +38,8 @@ llm = HuggingFaceEndpoint(
     max_new_tokens=350
 )
 
-# model = ChatHuggingFace(llm=llm)
-model = ChatOpenAI()
+model = ChatHuggingFace(llm=llm)
+# model = ChatOpenAI()
 
 def query(context,query):
     parser = StrOutputParser()
