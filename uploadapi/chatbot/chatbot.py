@@ -42,6 +42,8 @@ def query(context,query):
     _answer_chain = _answer_prompt | model | parser
     ans = _answer_chain.invoke({"context":context,"query":query})
     print(ans)
+    print("Answer from LLM type--> ",type(ans))
+    return ans
 
 
 

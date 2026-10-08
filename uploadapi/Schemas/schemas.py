@@ -7,4 +7,10 @@ class Document(BaseModel):
     page_content: str
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+class LLMResponse(BaseModel):
+    query : str
+    answer : str
+    chunks : list[str]
+    scores : list[float]
+    
 upload_progress = {}
