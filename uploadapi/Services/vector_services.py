@@ -93,15 +93,23 @@ class ChromaServices:
             raw_id.encode("utf-8")
         ).hexdigest()
 
-    def get_all_doc(self,collection_name:str):
+    def get_all_doc(self,collection_name:str,filename:str | None =None):
         client = self.get_chroma_client()
 
         collection = client.get_collection(collection_name)
 
-        result = collection.get()
+        if filename is None:
+            result = collection.get()
+        else:
+            result = collection.get(
+                where = {"file_name": filename},
+            )
+        
 
         document = result["documents"]
 
         print("Total document in vectordb  ---> ",len(document))
+
+        return document
 
 chroma_services = ChromaServices()
