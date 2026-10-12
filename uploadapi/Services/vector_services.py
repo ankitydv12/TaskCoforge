@@ -109,6 +109,7 @@ class ChromaServices:
         document = result["documents"]
 
         print("Total document in vectordb  ---> ",len(document))
+        print("Doc ---> ",document)
 
         return document
 

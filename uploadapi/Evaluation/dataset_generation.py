@@ -17,6 +17,8 @@ async def generate_eval_questions(
     llm_client = None
 ) -> list[dict]:
     """Generate evaluation questions from a document chunk."""
+    print(" Evalution Pipeline started ")
+
     prompt = f"""Given the following text, generate {num_questions} questions whose answers can be found in the text.
 For each question, also provide the exact answer from the text.
 
@@ -24,7 +26,8 @@ Text:
 {chunk}
 
 Return a JSON array of objects with 'question' and 'answer' keys.
-Only generate questions that have clear, unambiguous answers in the text."""
+Only generate questions that have clear, unambiguous answers in the text.
+"""
 
     response = await generate(prompt, response_format="json")
     response_json = parse_json(response)
@@ -48,6 +51,7 @@ Only generate questions that have clear, unambiguous answers in the text."""
 
 async def generate(prompt, response_format="json"):
 
+    print(" llm call ")
     print("Prompt------------>",prompt)
     llm =ChatOpenAI(
     model="gpt-4o-mini",

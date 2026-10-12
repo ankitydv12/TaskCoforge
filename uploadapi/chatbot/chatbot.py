@@ -38,8 +38,8 @@ llm = HuggingFaceEndpoint(
     max_new_tokens=350
 )
 
-model = ChatHuggingFace(llm=llm)
-# model = ChatOpenAI()
+# model = ChatHuggingFace(llm=llm)
+model = ChatOpenAI(model = "gpt-5.4-mini")
 
 def query(context,query):
     parser = StrOutputParser()
