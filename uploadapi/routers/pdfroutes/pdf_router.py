@@ -18,7 +18,6 @@ from Services.pdf_loader import load_pdf
 from Services.upload_service import save_pdf
 from Services.vector_services import chroma_services
 from Services.chunkingservice import chunk_services
-import time
 
 
 

@@ -14,3 +14,4 @@ numpy
 pypdf
 sentence-transformers
 torch
+dotenv

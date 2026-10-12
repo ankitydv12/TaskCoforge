@@ -96,7 +96,13 @@ class ChromaServices:
     def get_all_doc(self,collection_name:str,filename:str | None =None):
         client = self.get_chroma_client()
 
-        collection = client.get_collection(collection_name)
+        try:
+            collection = client.get_collection(collection_name)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Collection '{collection_name}' not found: {e}"
+            )
 
         if filename is None:
             result = collection.get()

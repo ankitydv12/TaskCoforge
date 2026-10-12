@@ -8,6 +8,10 @@ from ragas.metrics import (
 from datasets import Dataset
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
+
 # Your RAG pipeline results — one row per evaluated query
 eval_data = {
     "question": [

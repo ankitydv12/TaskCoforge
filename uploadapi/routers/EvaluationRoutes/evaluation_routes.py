@@ -6,7 +6,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "collection1")
+import sys
+
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 router = APIRouter(tags=["evaluation"])
 
@@ -16,18 +18,32 @@ async def generate_dataset_endpoint(filename:str | None = None):
     print("generate_dataset_endpoint called")
     """Endpoint to generate evaluation dataset from a document."""
 
-    document_text = chroma_services.get_all_doc("collection1", filename)
-    document_text2 = document_text[15:18]
-    print("length of the document for question ",len(document_text2))
-    if(len(document_text2)==0):
+    document_text = chroma_services.get_all_doc(str(COLLECTION_NAME), filename)
+
+    if document_text is None or len(document_text) == 0:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,detail="chunk of the length for data generation is 0")
 
+    for i , chunk in enumerate(document_text):
+        sys.stdout.write(f"Chunk {i}: {chunk}\n")
+
     
+    selected_chunks = document_text[18:19]
+    print("length of the document for question ",len(selected_chunks))
+    
+    generated_questions = []
 
-    for chunk in document_text2:
-        await generate_eval_questions(
-                        chunk, 
-                        num_questions=3, 
-            )
+    for chunk in selected_chunks:
 
+        questions = await generate_eval_questions(
+            chunk=chunk,
+            num_questions=3,
+        )
 
+        generated_questions.extend(questions)
+
+    return {
+        "message": "Evaluation dataset generated successfully",
+        "chunks_processed": len(selected_chunks),
+        "questions_generated": len(generated_questions),
+        "data": generated_questions,
+    }

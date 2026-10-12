@@ -13,8 +13,7 @@ def parse_json(response: str) -> list[dict]:
 
 async def generate_eval_questions(
     chunk: str,
-    num_questions: int = 3,
-    llm_client = None
+    num_questions: int = 2
 ) -> list[dict]:
     """Generate evaluation questions from a document chunk."""
     print(" Evalution Pipeline started ")
@@ -60,14 +59,13 @@ async def generate(prompt, response_format="json"):
     }
     )
     response = await llm.ainvoke(prompt)
-    print("Response from LLM type--> ",type(response.content))
     print("Response from LLM content--> ",response.content)
     return response.content
 
 
-async def json_to_csv(json_data:list[dict], csv_file_path:str = "evaluation_dataset.csv"):
+async def json_to_csv(json_data:list[dict], csv_file_path:str = "uploadapi/evaluation_dataset.csv"):
     import pandas as pd
     if not json_data:
         raise ValueError("The provided JSON data is empty.")
     df = pd.DataFrame(json_data)
-    df.to_csv(csv_file_path, index=False ,mode='a',header = False)
+    df.to_csv(csv_file_path, index=False ,mode='a',header = False ,sep='|')
