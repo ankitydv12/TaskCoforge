@@ -1,61 +1,121 @@
 import asyncio
-from ragas import evaluate
-from ragas.metrics import (
-    faithfulness,
-    answer_relevancy,
-    context_precision,
-    context_recall,
-    answer_correctness,
+from statistics import fmean
+ 
+from openai import AsyncOpenAI
+from ragas.llms import llm_factory
+from ragas.embeddings.base import embedding_factory
+ 
+from ragas.metrics.collections import (
+    Faithfulness,
+    AnswerRelevancy,
+    ContextPrecisionWithReference,
+    ContextRecall,
+    AnswerCorrectness,
 )
-
-from datasets import Dataset
-from langchain_openai import ChatOpenAI , OpenAIEmbeddings
-
+ 
 from dotenv import load_dotenv
+ 
 load_dotenv()
-
+ 
+ 
+# Configure RAGAS evaluator models
+client = AsyncOpenAI()
+ 
+evaluation_llm = llm_factory(
+    "gpt-4o-mini",
+    client=client,
+)
+ 
+evaluation_embeddings = embedding_factory(
+    "openai",
+    model="text-embedding-3-small",
+)
+ 
+ 
+# Initialize metrics once, rather than for every question
+faithfulness_metric = Faithfulness(llm=evaluation_llm)
+ 
+answer_relevancy_metric = AnswerRelevancy(
+    llm=evaluation_llm,
+    embeddings=evaluation_embeddings,
+)
+ 
+context_precision_metric = ContextPrecisionWithReference(
+    llm=evaluation_llm,
+)
+ 
+context_recall_metric = ContextRecall(
+    llm=evaluation_llm,
+)
+ 
+answer_correctness_metric = AnswerCorrectness(
+    llm=evaluation_llm,
+    embeddings=evaluation_embeddings,
+)
+ 
+ 
 async def evaluate_rag_pipeline(
-    golden_dataset : list[dict],
+    golden_dataset: list[dict],
     rag_pipeline,
-    llm,
-    embeddings
-)->dict:
-    questions = []
-    ground_truths = []
-    all_contexts = []
-    all_answers = []
-
-    for record in golden_dataset:
-
-        results = await rag_pipeline.query(record["question"])
-
-        questions.append(record["question"])
-        ground_truths.append(record["ground_truths"])
-
-        all_contexts.append(results.retrieve_chunk) #TODO : check it
-        all_answers.append(results.answer)
-
-    dataset = Dataset.from_dict(
-    {       "question" : questions,
-            "contexts" : all_contexts,
-            "answer" : all_answers,
-            "ground_truth" : ground_truths
+) -> dict:
+ 
+    metric_scores = {
+        "faithfulness": [],
+        "answer_relevancy": [],
+        "context_precision": [],
+        "context_recall": [],
+        "answer_correctness": [],
     }
-    )
-
-    scores = evaluate(
-            dataset = dataset,
-            metrics = [
-                faithfulness,
-                answer_relevancy,
-                context_precision,
-                context_recall,
-                answer_correctness,
-            ],
-            llm = llm,
-            embeddings = embeddings
+ 
+    for record in golden_dataset:
+        question = record["question"]
+        reference = record["ground_truth"]
+ 
+        # Execute your actual RAG application.
+        result = await rag_pipeline.query(question)
+ 
+        # Must be a list[str] containing the actual retrieved contexts.
+        contexts = result.retrieved_chunks
+        answer = result.answer
+ 
+        # Evaluate all metrics for this question.
+        results = await asyncio.gather(
+            faithfulness_metric.ascore(
+                response=answer,
+                retrieved_contexts=contexts,
+            ),
+            answer_relevancy_metric.ascore(
+                user_input=question,
+                response=answer,
+            ),
+            context_precision_metric.ascore(
+                user_input=question,
+                retrieved_contexts=contexts,
+                reference=reference,
+            ),
+            context_recall_metric.ascore(
+                user_input=question,
+                retrieved_contexts=contexts,
+                reference=reference,
+            ),
+            answer_correctness_metric.ascore(
+                response=answer,
+                reference=reference,
+            ),
         )
-
-    return scores.to_pandas().mean().to_dict()    
-
-
+ 
+        for metric_name, metric_result in zip(
+            metric_scores.keys(),
+            results,
+        ):
+            metric_scores[metric_name].append(
+                metric_result.value
+            )
+ 
+    # Return the average score for each metric.
+    return {
+        name: fmean(scores)
+        for name, scores in metric_scores.items()
+        if scores
+    }
+ 

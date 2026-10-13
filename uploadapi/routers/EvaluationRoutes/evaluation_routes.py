@@ -69,9 +69,7 @@ async def evalution_test():
 
         evalution_result = await evaluate_rag_pipeline(
             golden_dataset = golden_dataset,
-            rag_pipeline = LLMService("openai"),
-            llm = LLMService("openai"),
-            embeddings = LLMService("openaiembeddings")
+            rag_pipeline = LLMService("openai")
         )
 
         print(evalution_result)
