@@ -20,33 +20,30 @@ async def evaluate_rag_pipeline(
     llm,
     embeddings
 )->dict:
-    questions = [],
-    ground_truths = [],
-    all_contexts = [],
+    questions = []
+    ground_truths = []
+    all_contexts = []
     all_answers = []
 
     for record in golden_dataset:
 
-
-
-        results = rag_pipeline.query(record["questions"])
+        results = await rag_pipeline.query(record["question"])
 
         questions.append(record["question"])
-        ground_truths.append(record["answers"]) #TODO : check it
+        ground_truths.append(record["ground_truths"])
 
-        all_contexts.append(results.retrieve_chunk)
+        all_contexts.append(results.retrieve_chunk) #TODO : check it
         all_answers.append(results.answer)
 
-        dataset = Dataset.from_dict(
-            {
-                "questions" : questions,
-                "contexts" : all_contexts,
-                "answer" : all_answers,
-                "ground_truth" : ground_truths
-            }
-        )
+    dataset = Dataset.from_dict(
+    {       "question" : questions,
+            "contexts" : all_contexts,
+            "answer" : all_answers,
+            "ground_truth" : ground_truths
+    }
+    )
 
-        scores = evaluate(
+    scores = evaluate(
             dataset = dataset,
             metrics = [
                 faithfulness,
@@ -59,6 +56,6 @@ async def evaluate_rag_pipeline(
             embeddings = embeddings
         )
 
-        return scores.to_pandas().mean().to_dict()    
+    return scores.to_pandas().mean().to_dict()    
 
 

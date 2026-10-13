@@ -1,5 +1,9 @@
-from langchain_openai import ChatOpenAI
-from langchain_huggingface import HuggingFaceEndpoint , ChatHuggingFace
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_huggingface import (
+    HuggingFaceEndpoint , 
+    ChatHuggingFace , 
+    HuggingFaceEmbeddings
+    )
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from Services.retrival_service import retrival
@@ -9,7 +13,7 @@ import os
 
 load_dotenv()
 
-COLLECTION_NAME = os.getenv(COLLECTION_NAME)
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 class LLMService:
 
@@ -49,7 +53,12 @@ class LLMService:
         
         ans = _answer_chain.invoke({"context":reranked_chunk[:5],"query":query})
         print("Answer from LLM --> ",ans)
-        return ans , reranked_chunk[:5] , rerank_score
+        return {
+            "answer": ans,
+            "reranked_chunk": reranked_chunk[:5],
+            "rerank_score" : rerank_score[:5]
+        }
+        
     
 
 class LLMFactory:
@@ -67,6 +76,12 @@ class LLMFactory:
         
         elif provider == "openai":
             return ChatOpenAI(model = "gpt-5.4-mini")
+
+        elif provider == "openaiembeddings":
+            return OpenAIEmbeddings()
+
+        elif provider == "huggingfaceembeddings":
+            return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
         raise ValueError("Unsupported provider")
 

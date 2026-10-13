@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-COLLECTION_NAME = os.getenv(COLLECTION_NAME)
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 router = APIRouter(tags=["chatbot"])
 
@@ -18,11 +18,11 @@ def askchatbot(query:str):
 
     llm_services = LLMService("openai")
 
-    ans , reranked_chunk , rerank_score = llm_services.query(query)
+    result = llm_services.query(query)
 
     return LLMResponse(
         query=query,
-        answer=ans,
-        chunks=reranked_chunk[:5],
-        scores=rerank_score[:5]
+        answer=result["answer"],
+        chunks=result["reranked_chunk"],
+        scores=result["rerank_score"]
     )

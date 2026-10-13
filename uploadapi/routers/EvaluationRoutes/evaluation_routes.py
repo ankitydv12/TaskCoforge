@@ -5,6 +5,10 @@ from chatbot.chatbot import model
 import os
 import csv
 from dotenv import load_dotenv
+from Evaluation.evaluation_pipeline import evaluate_rag_pipeline
+from Services.llm_services import LLMService
+
+
 load_dotenv()
 
 import sys
@@ -58,4 +62,17 @@ async def evalution_test():
 
         golden_dataset = [row for row in reader]
 
-        
+        print(golden_dataset)
+        print("length of the golden dataset ",len(golden_dataset))
+        print("type of the golden dataset ",type(golden_dataset))
+        print("Calling the evaluation pipeline")
+
+        evalution_result = await evaluate_rag_pipeline(
+            golden_dataset = golden_dataset,
+            rag_pipeline = LLMService("openai"),
+            llm = LLMService("openai"),
+            embeddings = LLMService("openaiembeddings")
+        )
+
+        print(evalution_result)
+        return evalution_result
