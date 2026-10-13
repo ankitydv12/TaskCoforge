@@ -20,3 +20,14 @@ requests==2.32.3
 tenacity==8.2.3
 protobuf==4.25.3
 grpcio==1.62.2
+
+#for rest of the project
+fastapi
+pypdf
+dotenv
+chromadb
+sentence_transformers
+torch
+python-multipart
+pydantic
+pydantic-settings

@@ -1,25 +1,25 @@
 from fastapi import APIRouter
-from chatbot import chatbot
-from Services.retrival_service import retrival
-from Services.reranking_service import reranking_service
+from Services.llm_services import LLMService
 from Schemas.schemas import LLMResponse
+
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+COLLECTION_NAME = os.getenv(COLLECTION_NAME)
 
 router = APIRouter(tags=["chatbot"])
 
 
 @router.post("/chatbot",response_model=LLMResponse)
-def askchatbot(query:str,top:int):
+def askchatbot(query:str):
     print("*"*20 + "askchatbot" + "*"*20)
-    #TODO: get collection from the .env file
-    retrive_chunk = retrival.chroma_query(query,"collection1",top)
 
-    documents =  [y for x in retrive_chunk["documents"] for y in x]
+    llm_services = LLMService("openai")
 
-    
-    reranked_chunk , rerank_score = reranking_service.cross_encoder_reranking(query,documents)
+    ans , reranked_chunk , rerank_score = llm_services.query(query)
 
-    ans = chatbot.query(reranked_chunk[:5],query)
-    print("Answer from LLM --> ",ans)
     return LLMResponse(
         query=query,
         answer=ans,

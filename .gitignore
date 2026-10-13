@@ -12,3 +12,4 @@ uploadapi/routers/pdfroutes/__pycache__/
 uploadapi/routers/chatbotroute/__pycache__
 chatbot/__pycache__/
 uploadapi/Evaluation/Evalenv
+uploadapi/.venv/

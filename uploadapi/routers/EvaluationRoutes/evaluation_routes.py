@@ -3,6 +3,7 @@ from Evaluation.dataset_generation import generate_eval_questions
 from Services.vector_services import chroma_services
 from chatbot.chatbot import model
 import os
+import csv
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -47,3 +48,14 @@ async def generate_dataset_endpoint(filename:str | None = None):
         "questions_generated": len(generated_questions),
         "data": generated_questions,
     }
+
+@router.get("/eval/test")
+async def evalution_test():
+    # Question from the evalution_dataset.csv
+    with open('evalution_dataset.csv','r',newline='') as csv_file:
+
+        reader = csv.DictReader(csv_file,delimiter='|')
+
+        golden_dataset = [row for row in reader]
+
+        

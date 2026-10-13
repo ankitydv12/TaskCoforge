@@ -1,6 +1,9 @@
 import json
+import csv
+import os
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -62,10 +65,26 @@ async def generate(prompt, response_format="json"):
     print("Response from LLM content--> ",response.content)
     return response.content
 
-
+#Todo: csv_file_path from .env
 async def json_to_csv(json_data:list[dict], csv_file_path:str = "uploadapi/evaluation_dataset.csv"):
-    import pandas as pd
     if not json_data:
         raise ValueError("The provided JSON data is empty.")
-    df = pd.DataFrame(json_data)
-    df.to_csv(csv_file_path, index=False ,mode='a',header = False ,sep='|')
+
+    fieldnames = [
+        "question",
+        "ground_truths",
+        "source_chunk"
+    ]
+
+    file_exits = os.path.exists(csv_file_path)
+
+    write_header = (not file_exits or os.path.getsize(csv_file_path)==0)
+
+    with open(csv_file_path,"a",newline='') as csv_file:
+
+        writter = csv.DictWriter(csv_file,fieldnames=fieldnames,delimiter='|')
+
+        if write_header:
+            writter.writeheader(fieldnames)
+        
+        writter.writerows(json_data)
