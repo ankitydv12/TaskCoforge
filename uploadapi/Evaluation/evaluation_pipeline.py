@@ -1,3 +1,14 @@
+import sys
+import types
+
+if "langchain_community.chat_models.vertexai" not in sys.modules:
+    _stub = types.ModuleType("langchain_community.chat_models.vertexai")
+
+    class ChatVertexAI:
+        pass
+
+    _stub.ChatVertexAI = ChatVertexAI
+    sys.modules["langchain_community.chat_models.vertexai"] = _stub
 import asyncio
 from statistics import fmean
  
@@ -29,6 +40,8 @@ evaluation_llm = llm_factory(
 evaluation_embeddings = embedding_factory(
     "openai",
     model="text-embedding-3-small",
+    client=client,
+    interface="modern",
 )
  
  
@@ -69,13 +82,13 @@ async def evaluate_rag_pipeline(
  
     for record in golden_dataset:
         question = record["question"]
-        reference = record["ground_truth"]
+        reference = record["ground_truths"]
  
         # Execute your actual RAG application.
         result = await rag_pipeline.query(question)
  
         # Must be a list[str] containing the actual retrieved contexts.
-        contexts = result.retrieved_chunks
+        contexts = result.reranked_chunk
         answer = result.answer
  
         # Evaluate all metrics for this question.

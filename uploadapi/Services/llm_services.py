@@ -41,7 +41,7 @@ class LLMService:
     def __init__(self, provider: str):
         self.llm = LLMFactory.create(provider)
 
-    def query(self,query):
+async def query(self,query):
         parser = StrOutputParser()
         _answer_chain = LLMService._answer_prompt | self.llm | parser
 

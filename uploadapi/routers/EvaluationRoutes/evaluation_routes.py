@@ -56,7 +56,7 @@ async def generate_dataset_endpoint(filename:str | None = None):
 @router.get("/eval/test")
 async def evalution_test():
     # Question from the evalution_dataset.csv
-    with open('evalution_dataset.csv','r',newline='') as csv_file:
+    with open('evaluation_dataset.csv','r',newline='') as csv_file:
 
         reader = csv.DictReader(csv_file,delimiter='|')
 
