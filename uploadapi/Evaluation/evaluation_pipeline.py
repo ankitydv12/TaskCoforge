@@ -86,16 +86,17 @@ async def evaluate_rag_pipeline(
  
         # Execute your actual RAG application.
         result = await rag_pipeline.query(question)
- 
+        
         # Must be a list[str] containing the actual retrieved contexts.
-        contexts = result.reranked_chunk
-        answer = result.answer
+        contexts = result["reranked_chunk"]
+        answer = result["answer"]
  
         # Evaluate all metrics for this question.
         results = await asyncio.gather(
             faithfulness_metric.ascore(
                 response=answer,
                 retrieved_contexts=contexts,
+                user_input = question,
             ),
             answer_relevancy_metric.ascore(
                 user_input=question,
@@ -114,6 +115,7 @@ async def evaluate_rag_pipeline(
             answer_correctness_metric.ascore(
                 response=answer,
                 reference=reference,
+                user_input=question,
             ),
         )
  

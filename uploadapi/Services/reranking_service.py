@@ -5,6 +5,8 @@ from sentence_transformers import CrossEncoder
 class Reranking_Service:
     def cross_encoder_reranking(self,query:str,document:list[str]):
 
+        print("Reranking using cross encoder")
+
         cross_encoder = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2',
                                      device = 'cuda' if torch.cuda.is_available() else 'cpu'
                         )
@@ -12,16 +14,15 @@ class Reranking_Service:
         pairs = [(query , chunk) for chunk in document ]
         scores = cross_encoder.predict(pairs)
 
-        print("Scores --> ",scores)
-        print("Scores Length --> ",len(scores))
+        
 
         ranked_indices = np.argsort(scores)[::-1] # Return the indices of the documents
-        print("Ranked Indices --> ",ranked_indices)
+        
 
         ranked_docs = [document[i] for i in ranked_indices]
         ranked_score = [scores[i] for i in ranked_indices]
-        print("Ranked Docs --> ",ranked_docs)
-        print("Ranked Score --> ",ranked_score)
+        
+        print("Reranking done using cross encoder")
 
         return ranked_docs , ranked_score
 

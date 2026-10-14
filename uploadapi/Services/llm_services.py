@@ -41,7 +41,7 @@ class LLMService:
     def __init__(self, provider: str):
         self.llm = LLMFactory.create(provider)
 
-async def query(self,query):
+    async def query(self,query):
         parser = StrOutputParser()
         _answer_chain = LLMService._answer_prompt | self.llm | parser
 
@@ -52,7 +52,6 @@ async def query(self,query):
         reranked_chunk , rerank_score = reranking_service.cross_encoder_reranking(query,documents)
         
         ans = _answer_chain.invoke({"context":reranked_chunk[:5],"query":query})
-        print("Answer from LLM --> ",ans)
         return {
             "answer": ans,
             "reranked_chunk": reranked_chunk[:5],

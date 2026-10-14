@@ -31,9 +31,7 @@ class Retrivals:
             n_results=Retrivals.top
         )
 
-        print("Retriving done")
-        print(type(result))
-        print(result)
+        print("Retrive done from vector store")
         return result
 
 retrival = Retrivals()
