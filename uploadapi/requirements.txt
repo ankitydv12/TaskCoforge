@@ -5,6 +5,11 @@ pydantic
 pydantic-settings
 python-dotenv
 chromadb
+aiosqlite
+datasets
+openai
+ragas
+sqlalchemy
 langchain-core
 langchain-experimental
 langchain-huggingface
@@ -14,4 +19,3 @@ numpy
 pypdf
 sentence-transformers
 torch
-dotenv

@@ -18,7 +18,7 @@ async def lifespan(app_:FastAPI):
 
     print("Connection to database")
     async with engine.begin() as conn:
-        conn.run_sync(Base.metadata.creat_all)
+        conn.run_sync(Base.metadata.create_all)
     
     try:
         yield

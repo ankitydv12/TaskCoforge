@@ -13,12 +13,12 @@ router = APIRouter(tags=["chatbot"])
 
 
 @router.post("/chatbot",response_model=LLMResponse)
-def askchatbot(request : Request , query:str):
+async def askchatbot(request : Request , query:str):
     print("*"*20 + "askchatbot" + "*"*20)
 
     llm_services = request.app.state.llm_service
 
-    result = llm_services.query(query)
+    result = await llm_services.query(query)
 
     return LLMResponse(
         query=query,

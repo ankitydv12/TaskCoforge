@@ -26,14 +26,7 @@ class LLMService:
         "You are an HR policy assistant for Coforge employees. Answer using "
         "ONLY the policy content below. Do not guess, estimate, or use outside "
         "knowledge — every number or fact in your answer must come directly "
-        "from the context. Give a concise, direct answer when a source passage "
-        "contains the answer, including any stated number, duration, "
-        "eligibility, or condition. Do not use the fallback response merely "
-        "because the question does not name a policy ; the retrieved context "
-        "may come from multiple policies, if only policy name is in query five the summary from context \n\n"
-        "Use the fallback response only if none of the source passages "
-        "provides an answer to the question. The fallback response must be "
-        f'exactly: "{NOT_FOUND_RESPONSE}"\n\n'
+        "from the context. Give a concise, direct answer when a source passage contains the answer "
         "Context:\n{context}"),
         ("human", "{query}"),
     ])
