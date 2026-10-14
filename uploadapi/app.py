@@ -3,10 +3,30 @@ from routers.pdfroutes.pdf_router import router as pdf_router
 from routers.chatbotroute.chatbot_routes import router as chatbot_router
 from routers.EvaluationRoutes.evaluation_routes import router as eval_router
 
+from contextlib import asynccontextmanager
+from Services.llm_services import LLMService
+from database.database import engine , Base , get_db
+
 import os
 import shutil
 from Configs.config import settings
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app_:FastAPI):
+    print("Creating Object Of LLM Services")
+    app.state.llm_service = LLMService("openai")
+
+    print("Connection to database")
+    async with engine.begin() as conn:
+        conn.run_sync(Base.metadata.creat_all)
+    
+    try:
+        yield
+    finally:
+        print("Shutting Down...")
+        await engine.dispose()
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(pdf_router)
 app.include_router(chatbot_router)
